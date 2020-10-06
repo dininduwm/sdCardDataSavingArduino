@@ -4,7 +4,7 @@ import csv
 # Note: If you want to change the number od data points in a row when decoding you
 # should change the below variable named 
 # number of data points in a row numOfDataPoints
-numOfDataPoints = 4
+numOfDataPoints = 6
 
 # path and the file name to be read
 file = open("DAT1_NEW.BIN","rb") 
@@ -20,10 +20,14 @@ with open('dumpData.csv', 'w', newline='') as writeFile:
     writer = csv.writer(writeFile)
     # reading four byte by four byte until the eof 
     while byte:
-        # appending new value to the res array        
-        res.append(round(float(struct.unpack('>f', byte)[0]), 4))   #little endian
+        # appending new value to the res array  
+        print(byte)
+        try:      
+            res.append(round(float(struct.unpack('>f', byte)[0]), 4))   #little endian
+        except:
+            print("Unpack Error");
 
-        if count == 4:
+        if count == numOfDataPoints:
             writer.writerow(res)
             # resetting the row
             res = []
