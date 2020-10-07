@@ -95,10 +95,10 @@ void writeToSDCard()
 
   //adding the end line bits
   //Serial.println(res);
-  res += (String) char(97) + char(97) + char(97) + char(97);
-  // add time for the res
-  res = (String) (diffTime & 255) + res;
 
+  // add time and terminating bytes for the res
+  res += (String) char(diffTime & 255) + char(97) + char(97) + char(97) + char(97);
+  
   // writting to the SD card
   root = SD.open(fName, FILE_WRITE);
 

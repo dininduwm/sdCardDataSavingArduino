@@ -6,18 +6,32 @@ import csv
 # number of data points in a row numOfDataPoints
 noOfDataPoints = 6
 
-# path and the file name to be read
-file = open("DAT1_NEW.BIN","rb") 
+# variables needed for file handling
+file = 0
+
+# taking the input file name 
+while(1):
+    print("Enter the file name (ex: 'DATA2.BIN'): ", end = '')
+    fileName = input()
+    try:
+        # path and the file name to be read
+        file = open(fileName,"rb") 
+        print("File Successfully opened")
+        break
+    except:
+        print("File not found please enter a valid file name")
+        print()
 
 # reading four bytes at the begining
 byte = file.read(1)
 
+# usefull tmp values
 count = 0
 res = []
 finalData = []
 
 # opening the csv file to dump data values
-with open('dumpData.csv', 'w', newline='') as writeFile:
+with open(fileName[:len(fileName)-4] + '_DUMP.csv', 'w', newline='') as writeFile:
     writer = csv.writer(writeFile)
     # reading four byte by four byte until the eof 
     while byte:
@@ -29,7 +43,12 @@ with open('dumpData.csv', 'w', newline='') as writeFile:
 
         if (count == 4):
 
-            if (len(res) == noOfDataPoints*4+4):
+            if (len(res) == noOfDataPoints*4+5):
+                #grabing the time stamp
+                timeStamp = int.from_bytes(res[len(res)-5],byteorder='big')
+                finalData.append(timeStamp)
+                print(timeStamp, end=',')
+
                 for section in range (noOfDataPoints):
                     sectionArr = res[section*4:section*4+4]
                     #print(sectionArr)                
@@ -48,7 +67,7 @@ with open('dumpData.csv', 'w', newline='') as writeFile:
                 # resetting the array
                 finalData = []
             else:
-                print(res)
+                pass
             res = []
             count = 0
 
