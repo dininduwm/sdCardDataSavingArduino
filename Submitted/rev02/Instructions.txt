@@ -1,0 +1,57 @@
+Q01)
+In your approch arduino save the stuct as bytes of data in a format that it can unserstand.
+If you are reding data back from the arduino then your approach may be good. In your appproch 
+you are wasting some bytes save the data structure also for every data point.
+
+In my appproch I saved the values in binary format. a single float value in four bytes(32 bits)
+when we converting floating point numbers to binary there is a standard method which defined from
+IEEE you can read about the method in the below link.
+site - https://en.wikipedia.org/wiki/Single-precision_floating-point_format
+
+If we use the previous method we cannot extract them from python. Because the data strcture is defined
+such a way that arduino can understand.
+
+
+Q02)
+I added the time stamp. that gives the time interval between the current data point and the previous data point
+in milliseconds.
+
+Q03)
+I corrected the file saving convension as you need.
+
+Q04)
+data is in below order
+timeStamp,AccX,AccY,AccZ,GyroX,GyroY,GyroZ
+
+Q05)
+
+Step 01
+
+In arduino code you need to change the size of the array 
+in line 47,
+#define NoOfDataPorints 6
+you need to change 6 to 7 if you are adding one more data point
+
+Step 02
+
+Adding data to the array
+if the value is x then you have to add the below line,
+dataPoints[6] = x;
+
+Step 03
+
+In python code you have to change line 7
+noOfDataPoints = 6
+change 6 to 7
+
+Thats It!!!!
+
+Q07)
+After you run the code it will ask for the file name then you have to type the file name and hit
+Enter key
+
+Q08) 
+I have changed the csv file naming convension as you wish
+
+Q09)
+There was an unwanted print statement in the code. I removed that
