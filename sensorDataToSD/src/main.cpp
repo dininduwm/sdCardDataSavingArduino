@@ -27,11 +27,19 @@
 #include <SD.h>
 #include "Wire.h"
 
+
 // address for the gyro
 const int MPU_ADDR = 0x68;
 
 // Flile object to save data to File
 File root;
+
+// File name to write
+String fName;
+
+// variable to save the time
+unsigned long now;
+int diffTime;
 
 // Array to hold the values to be written to the SD card
 // If you are changing the number of elements in the data Struct you should change the numer of
@@ -82,13 +90,17 @@ void writeToSDCard()
     res += convertToChar(dataPoints[i]);
   }
 
+  // calculate the time
+  diffTime = int(millis()-now);
+
   //adding the end line bits
   //Serial.println(res);
   res += (String) char(97) + char(97) + char(97) + char(97);
-  //Serial.println(res);
+  // add time for the res
+  res = (String) (diffTime & 255) + res;
 
   // writting to the SD card
-  root = SD.open("dat1_new.bin", FILE_WRITE);
+  root = SD.open(fName, FILE_WRITE);
 
   if (root)
   {
@@ -100,6 +112,51 @@ void writeToSDCard()
     // if the file didn't open, print an error:
     Serial.println("error opening dat1_new.bin");
   }
+}
+
+void getFileName()
+{
+  // moving to the root directory
+  root = SD.open("/");
+
+  // max value
+  int max = 0;
+
+  // loop through the files
+  while (true)
+  {
+
+    File entry = root.openNextFile();
+    
+    if (!entry)
+    {
+      // no more files
+      break;
+    }
+
+    // loop through onli the files in root
+    if (!entry.isDirectory())
+    {
+      String name = entry.name();
+      name = name.substring(0, name.length() - 4);
+
+      if (name.substring(0, 4) == "DATA")
+      {
+        // find the max file name
+        int num = name.substring(4).toInt();
+        if (num > max)
+        {
+          max = num;
+        }
+      }
+    }
+
+    entry.close();
+  }
+
+  // setting the new file name
+  fName = "DATA" + String(max + 1) + ".BIN";
+  Serial.println("Printing to file 'DATA" + String(max + 1) + ".BIN'");
 }
 
 void setup()
@@ -122,29 +179,15 @@ void setup()
 
   Serial.println("SD card Module initialization done.");
 
+  // find and resoleve the new file name
+  getFileName();
+
   // Initializa the Gyro
   Gyrosetup();
   delay(1000);
 
-  /*
-  // opening the sd card data saving process
-  root = SD.open("dat1_new.bin", FILE_WRITE);
-
-  if (root)
-  {
-    for (int i = 0; i < 20; i++) {
-      root.print(convertToChar(2.35));
-    }
-    Serial.println("Writing Done");
-    root.close();
-  }
-  else
-  {
-    // if the file didn't open, print an error:
-    Serial.println("error opening dat1_new.bin");
-  }  
-
-  */
+  // saving the current time
+  now = millis();
 }
 
 void loop()
@@ -183,6 +226,8 @@ void loop()
   // Saving new Values to the Array
   writeToSDCard();
 
+  Serial.print(diffTime);
+  Serial.print(", ");
   for (int i = 0; i < 6; i++)
   {
     Serial.print(dataPoints[i]);
@@ -190,5 +235,8 @@ void loop()
   }
   Serial.println();
 
-  delay(50);
+  // reset the time again 
+  now = millis();
+
+  delay(10);  
 }
